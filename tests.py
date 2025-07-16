@@ -121,3 +121,11 @@ def test_value_fecha():
     with pytest.raises(ValueError):
         clases.Venta(id_venta=1, producto="Manzana", cantidad=4, 
                          precio_unitario=2.50, fecha="     ")
+        
+# AnalizadorVentas
+def test_value_cargar_datos_desde_csv():
+    """
+    Verifica que ruta_archivo sea un str
+    """
+    with pytest.raises(TypeError):
+        clases.AnalizadorVentas.cargar_datos_desde_csv(123)

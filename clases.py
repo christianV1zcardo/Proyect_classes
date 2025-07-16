@@ -102,12 +102,18 @@ class AnalizadorVentas:
     def cargar_datos_desde_csv(cls, ruta_archivo, separador=',', 
                                codificacion='latin-1'):
         
+        # Verifico que el .csv inputado sea del formato correcto
+        if not isinstance(ruta_archivo, str):
+            raise TypeError('La ruta del archivo debe ser un str .csv')
+        
         cls._todas_las_ventas.clear()  # Deja limpio el atributo
         
         try:
             # Lee el csv
             df = pd.read_csv(ruta_archivo, sep=separador, encoding=codificacion)
-            lista_ventas = cls.procesar_dataframe_ventas(df)
+            # Iteración y creación de lista de objetos Venta
+            lista_ventas = cls._procesar_dataframe_ventas(df)
+            # Asignación de lista de objetos Venta a atributo de clase
             cls._todas_las_ventas = lista_ventas.copy()
 
         except FileNotFoundError:
@@ -115,3 +121,40 @@ class AnalizadorVentas:
             
         except Exception as e:
             print(f"Error al leer el archivo: {e}")
+           
+           
+    def obtener_total_ventas(self):
+        suma_ventas = 0  # Lista para almacenar la suma de ventas
+        # Itero entre todos los objetos Venta y sumo su total
+        for venta in self.__class__._todas_las_ventas:
+            suma_ventas += venta.calcular_total_venta()
+        
+        return suma_ventas
+    
+    
+    def obtener_venta_promedio(self):
+        # Si la lista está vacía retorna 0 e imprime el mensaje en la consola
+        if not self.__class__._todas_las_ventas:
+            print("La lista de ventas se encuentra vacía.")
+            return 0
+    
+        tot_ventas =  self.obtener_total_ventas()
+        cant_ventas = len(self.__class__._todas_las_ventas)
+        
+        return round((tot_ventas / cant_ventas), 2)
+    
+    
+    def obtener_ventas_por_producto(self):
+        
+        resultado = {}
+        
+        for venta in self.__class__._todas_las_ventas:
+            
+            if venta.producto not in resultado:
+                resultado[venta.producto] = 0
+            
+            resultado[venta.producto] += venta.calcular_total_venta()
+        
+        resultado = pd.Series(resultado).sort_values(ascending=False)
+
+        return resultado
